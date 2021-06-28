@@ -23,38 +23,38 @@ global_url_data={}
 
 with open(global_url_list) as file:
     for line in file:
-        line=line.rstrip()
-
-        # start with a null entry
-        processed_url = ""
+        processed_url=line.rstrip()
 
         # Start processing the data
         # 1) http -. https normalization if True
+        # ignore ftp/etc. for know
         if global_site_uses_https == True:
-            if re.match("^http:", line):
-                processed_url = re.sub("^http:", "https:", line)
+            if re.match("^http:", processed_url):
+                processed_url = re.sub("^http:", "https:", processed_url)
+
         # DSA - remove translations
         # https://www.debian.org/security/2014/dsa-2906
         # https://www.debian.org/security/2014/dsa-2906.da.html
         if re.match("^https://www.debian.org/security/[1-2][0-9][0-9][0-9]/dsa-[0-9]*.[a-z][a-z].html$", processed_url):
             processed_url = re.sub(".[a-z][a-z].html$", "", processed_url)
+            global_url_data[processed_url] = ""
 
         # DSA undated - remove translations
         # https://www.debian.org/security/2014/dsa-2906
         # https://www.debian.org/security/2014/dsa-2906.da.html
         if re.match("^https://www.debian.org/security/undated/.*", processed_url):
             processed_url = re.sub(".[a-z][a-z].html$", "", processed_url)
-
+            global_url_data[processed_url] = ""
         # DSA pre DSA - remove translations
         # https://www.debian.org/security/2014/dsa-2906
         # https://www.debian.org/security/2014/dsa-2906.da.html
         if re.match("^https://www.debian.org/security/[1-2][0-9][0-9][0-9]/[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][a-z]*.[a-z][a-z].html", processed_url):
             processed_url = re.sub(".[a-z][a-z].html$", "", processed_url)
-
-        # If we don't explicitly know how to handle the URL, ignore it for now
-        if processed_url != "":
             global_url_data[processed_url] = ""
 
+        # If we don't explicitly know how to handle the URL, ignore it for now
+
+# Debugging
 #for key, value in global_url_data.items():
 #    print(key)
 
