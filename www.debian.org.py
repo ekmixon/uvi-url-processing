@@ -43,9 +43,8 @@ with open(global_url_list) as file:
             global_url_data[processed_url] = ""
 
         # DSA undated - remove translations
-        # https://www.debian.org/security/2014/dsa-2906
-        # https://www.debian.org/security/2014/dsa-2906.da.html
-        if re.match("^https://www.debian.org/security/undated/.*", processed_url):
+        # 1* removes /, /index, /index.html
+        if re.match("^https://www.debian.org/security/undated/1.*", processed_url):
             processed_url = re.sub("\.[a-z][a-z]\.html$", "", processed_url)
             global_url_data[processed_url] = ""
         # DSA pre DSA - remove translations
