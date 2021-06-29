@@ -38,21 +38,21 @@ with open(global_url_list) as file:
         # DSA - remove translations
         # https://www.debian.org/security/2014/dsa-2906
         # https://www.debian.org/security/2014/dsa-2906.da.html
-        if re.match("^https://www.debian.org/security/[1-2][0-9][0-9][0-9]/dsa-[0-9]*.[a-z][a-z].html$", processed_url):
-            processed_url = re.sub(".[a-z][a-z].html$", "", processed_url)
+        if re.match("^https://www.debian.org/security/[1-2][0-9][0-9][0-9]/dsa-[0-9]*\.[a-z][a-z]\.html$", processed_url):
+            processed_url = re.sub("\.[a-z][a-z]\.html$", "", processed_url)
             global_url_data[processed_url] = ""
 
         # DSA undated - remove translations
         # https://www.debian.org/security/2014/dsa-2906
         # https://www.debian.org/security/2014/dsa-2906.da.html
         if re.match("^https://www.debian.org/security/undated/.*", processed_url):
-            processed_url = re.sub(".[a-z][a-z].html$", "", processed_url)
+            processed_url = re.sub("\.[a-z][a-z]\.html$", "", processed_url)
             global_url_data[processed_url] = ""
         # DSA pre DSA - remove translations
         # https://www.debian.org/security/2014/dsa-2906
         # https://www.debian.org/security/2014/dsa-2906.da.html
-        if re.match("^https://www.debian.org/security/[1-2][0-9][0-9][0-9]/[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][a-z]*.[a-z][a-z].html", processed_url):
-            processed_url = re.sub(".[a-z][a-z].html$", "", processed_url)
+        if re.match("^https://www.debian.org/security/[1-2][0-9][0-9][0-9]/[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][a-z]*\.[a-z][a-z]\.html", processed_url):
+            processed_url = re.sub("\.[a-z][a-z]\.html$", "", processed_url)
             global_url_data[processed_url] = ""
 
         # If we don't explicitly know how to handle the URL, ignore it for now
