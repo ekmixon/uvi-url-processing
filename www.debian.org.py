@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
 
 import re
+
+# TODO: take a command line argument of a file with new Debian URLs, check for "debian.org" and process?
+
 #
 # Process www.debian.org file
 #
@@ -55,7 +58,7 @@ with open(global_url_list) as file:
         # If we don't explicitly know how to handle the URL, ignore it for now
 
 # Debugging
-#for key, value in global_url_data.items():
-#    print(key)
+for key, value in global_url_data.items():
+    print(key)
 
 # The above normalizes the Debian stuff down to 3500+ URLS from 40000+
