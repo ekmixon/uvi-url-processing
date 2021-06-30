@@ -16,6 +16,7 @@ global_security_url_downloads = "/mnt/c/GitHub/security-url-downloads/data"
 
 with open(global_url_list) as file:
     for line in file:
+        print("processing: " + line)
         url = line.rstrip()
         url_bytes = url.encode()
         h = hashlib.sha512()

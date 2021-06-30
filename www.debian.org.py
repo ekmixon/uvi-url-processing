@@ -54,6 +54,9 @@ with open(global_url_list) as file:
             processed_url = re.sub("\.[a-z][a-z]\.html$", "", processed_url)
             global_url_data[processed_url] = ""
 
+        #if re.match("^https://www.debian.org/security/[1-2][0-9][0-9][0-9]/$", processed_url):
+            # list of DSA's by year, not useful since we have "date reported" in the files
+
         # If we don't explicitly know how to handle the URL, ignore it for now
 
 # Debugging
