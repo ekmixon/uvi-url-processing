@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 script_version = "0.0.1"
+script_name = "www.debian.org-processing.py"
 
 import hashlib
 # Requires Python 3.5 or later
@@ -12,6 +13,8 @@ import datetime
 import re
 import calendar
 
+# Kurt knows about Beautifulsoup and scrappy but Kurt also likes regex and state machines and DSA's are shockingly well formatted/regular.
+
 #
 # Processa file with a list of URLs
 #
@@ -20,6 +23,8 @@ global_security_url_downloads = "/mnt/c/GitHub/security-url-downloads/data"
 
 with open(global_url_list) as file:
     for line in file:
+        timestamp = datetime.datetime.utcnow() # <-- get time in UTC
+        processed_timestamp = timestamp.isoformat("T") + "Z"
         url = line.rstrip()
         url_bytes = url.encode()
         h = hashlib.sha512()
@@ -34,6 +39,13 @@ with open(global_url_list) as file:
         url_directory_raw_data = url_directory + "/raw-data"
         url_raw_data = url_directory_raw_data + "/server_response.data"
         url_extracted_data = url_directory + "/extracted_data.txt"
+
+        # Version data is split across lines
+#<p>For the oldstable distribution (stretch), these problems have been fixed
+#in version 3.17.0+ds1-5+deb9u1.</p>
+#<p>For the stable distribution (buster), these problems have been fixed in
+#version 3.18.0+ds2-1+deb10u1.</p>
+
 
         with open(url_raw_data) as data_file:
             #
@@ -72,6 +84,7 @@ with open(global_url_list) as file:
                     info_vuln = re.sub("^\s*<dd class=\"warning\">", "", data_line)
                     info_vuln = re.sub("</dd>$", "", info_date)
                     # print(info_date_string)
+                    info_vuln = "yes"
                     vuln_flag = False
                 if re.match("^<dt>Vulnerable:</dt>$", data_line):
                     vuln_flag = True
@@ -82,10 +95,10 @@ with open(global_url_list) as file:
                     info_date = re.sub("</dd>$", "", info_date)
                     info_date_parts = info_date.split(" ")
                     # TODO: pad out the month/day to two digits
-                    info_date_year = info_date_parts[2]
-                    info_date_month = list(calendar.month_abbr).index(info_date_parts[1])
-                    info_date_date = info_date_parts[0]
-                    info_date_string = info_date_year + "-" + str(info_date_month) + "-" + info_date_date
+                    info_date_year = str(info_date_parts[2])
+                    info_date_month = str(list(calendar.month_abbr).index(info_date_parts[1])).rjust(2, "0")
+                    info_date_date = str(info_date_parts[0]).rjust(2, "0")
+                    info_date_string = info_date_year + "-" + info_date_month + "-" + info_date_date
                     # print(info_date_string)
                     date_reported_flag = False
                 if re.match("^<dt>Date Reported:</dt>$", data_line):
@@ -104,8 +117,36 @@ with open(global_url_list) as file:
             # url - string
             # info_vuln - Yes or False
             # info_date_string - YYYY-M-D
+            # processed_timestamp - YYYY-MM-DD-HH-MM-SS
+            # script_version - string
+            # script_name - string
 
-
-
-
-# check for CVE,
+            # Try to use standards where possible e.g. OSV
+            extracted_data={
+                "osv": {
+                    "published": info_date_string,
+                    "package": {
+                        "name": debian_package_name
+                        },
+                    "references": [ {
+                        "type": debian_advisory_type,
+                        "url": url
+                        } ]
+                    },
+                "uvi": {
+                    "vendor_name": "Debian",
+                    "product_name": debian_package_name,
+                    "experimental": {
+                        "advisory_type": debian_dsa_id,
+                        "vulnerability_status": info_vuln,
+                        "processed_timestamp": processed_timestamp,
+                        "script_version": script_version,
+                        "script_name": script_name,
+                        "other_identifiers": {
+                            "cve": data_cve
+                            }
+                        }
+                    }
+                }
+            print("*****************")
+            print(json.dumps(extracted_data, indent=4, sort_keys=True))
