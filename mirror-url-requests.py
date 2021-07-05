@@ -8,10 +8,15 @@ import requests
 from requests.exceptions import RequestException
 import json
 import datetime
+import sys
+
+uvi_script_version = "0.0.2"
+uvi_script_name = sys.argv[0]
+
 #
 # Processa file with a list of URLs
 #
-global_url_list = "./urls-to-process.txt"
+global_url_list = sys.argv[1]
 global_security_url_downloads = "/mnt/c/GitHub/security-url-downloads/data"
 
 with open(global_url_list) as file:
@@ -32,7 +37,7 @@ with open(global_url_list) as file:
         url_directory_raw_data=url_directory + "/raw-data"
 
         if Path(url_directory_raw_data).is_dir():
-            print("file directory already exists")
+            print("file directory already exists: " + url_directory_raw_data)
             already_seen = True
         else:
             Path(url_directory_raw_data).mkdir(parents=True, exist_ok=True)
@@ -54,18 +59,25 @@ with open(global_url_list) as file:
             f.write(response.content)
             f.close()
 
-            request_data = url_directory + "/request.txt"
-            f = open(request_data, "w")
-            f.write("URL:" + url + "\n")
-            f.write("TIMESTAMP:" + request_timestamp + "\n")
-            f.write("REQUEST_METHOD:mirror-url-requests.py\n")
+            request_data_file = url_directory + "/request.json"
+            request_data = {
+                "URL_requested": url,
+                "TIMESTAMP": request_timestamp,
+                "uvi_script_name": uvi_script_name,
+                "uvi_script_version": uvi_script_version
+            }
+            f = open(request_data_file, "w")
+            f.write(json.dumps(request_data, indent=4, sort_keys=True))
             f.close()
 
-            response_data = url_directory + "/response.txt"
-            f = open(response_data, "w")
-            f.write("elapsed:" + str(response.elapsed) + "\n")
-            f.write("is_redirect:" + str(response.is_redirect) + "\n")
-            f.write("status_code:" + str(response.status_code) + "\n")
-            f.write("url:" + response.url + "\n")
-            f.write("response_file:" + response_file)
+            response_data_file = url_directory + "/response.json"
+            f = open(response_data_file, "w")
+            response_data = {
+                "elapsed": str(response.elapsed),
+                "is_redirect": str(response.is_redirect),
+                "status_code": str(response.status_code),
+                "url": response.url,
+                "response_file": response_file
+            }
+            f.write(json.dumps(response_data, indent=4, sort_keys=True))
             f.close()
