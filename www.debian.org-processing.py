@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
-script_version = "0.0.1"
-script_name = "www.debian.org-processing.py"
+uvi_script_version = "0.0.2"
+uvi_script_name = "www.debian.org-processing.py"
 
 import hashlib
 # Requires Python 3.5 or later
@@ -12,6 +12,7 @@ import json
 import datetime
 import re
 import calendar
+import scrapy
 
 # Kurt knows about Beautifulsoup and scrappy but Kurt also likes regex and state machines and DSA's are shockingly well formatted/regular.
 
@@ -38,14 +39,16 @@ with open(global_url_list) as file:
         url_directory = global_security_url_downloads + "/" + url_hash_1 + "/" + url_hash_2 + "/" + url_hash_3 + "/" + url_hash_4 + "/" + url_hash
         url_directory_raw_data = url_directory + "/raw-data"
         url_raw_data = url_directory_raw_data + "/server_response.data"
-        url_extracted_data = url_directory + "/extracted_data.txt"
+        url_extracted_data_file = url_directory + "/extracted_data.json"
 
-        # Version data is split across lines
-#<p>For the oldstable distribution (stretch), these problems have been fixed
-#in version 3.17.0+ds1-5+deb9u1.</p>
-#<p>For the stable distribution (buster), these problems have been fixed in
-#version 3.18.0+ds2-1+deb10u1.</p>
+        # Version data is split across lines, 2-3 linmes, and can be multiple packages/versions within a line so we need to use scrapy, also differing fixed/unfixed/etc.
 
+# TODO: scrapy to process document
+# scrapy shell https://www.debian.org/security/2009/dsa-1907
+# response.xpath("//*[contains(text(), 'these problems have been fixed in version')]").getall()
+# ['<p>For the stable distribution (lenny), these problems have been fixed in version\n72+dfsg-5~lenny3.</p>',
+# '<p>For the unstable distribution (sid) these problems have been fixed in version\n85+dfsg-4.1</p>']
+# TODO: remove line return(s) and extract the distriburtion name, and the fixed in version X
 
         with open(url_raw_data) as data_file:
             #
@@ -55,6 +58,9 @@ with open(global_url_list) as file:
             data_cve = []
             date_reported_flag = False
             vuln_flag = False
+            stable_flag = False
+            oldstable_flag = False
+            unstable_flag = False
             for data_line in data_file:
                 data_line = data_line.rstrip()
                 # Get the DSA if exists and the Debian package name
@@ -118,8 +124,8 @@ with open(global_url_list) as file:
             # info_vuln - Yes or False
             # info_date_string - YYYY-M-D
             # processed_timestamp - YYYY-MM-DD-HH-MM-SS
-            # script_version - string
-            # script_name - string
+            # uvi_script_version - string
+            # uvi_script_name - string
 
             # Try to use standards where possible e.g. OSV
             extracted_data={
@@ -140,13 +146,15 @@ with open(global_url_list) as file:
                         "advisory_type": debian_dsa_id,
                         "vulnerability_status": info_vuln,
                         "processed_timestamp": processed_timestamp,
-                        "script_version": script_version,
-                        "script_name": script_name,
+                        "uvi_script_version": script_version,
+                        "uvi_script_name": script_name,
                         "other_identifiers": {
                             "cve": data_cve
                             }
                         }
                     }
                 }
-            print("*****************")
-            print(json.dumps(extracted_data, indent=4, sort_keys=True))
+
+            f = open(url_extracted_data_file, "w")
+            f.write(json.dumps(extracted_data, indent=4, sort_keys=True))
+            f.close()
