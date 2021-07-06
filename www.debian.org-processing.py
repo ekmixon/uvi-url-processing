@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 uvi_script_version = "0.0.2"
-uvi_script_name = "www.debian.org-processing.py"
+uvi_script_name = sys.argv[0]
 
 import hashlib
 # Requires Python 3.5 or later
@@ -19,7 +19,7 @@ import scrapy
 #
 # Processa file with a list of URLs
 #
-global_url_list = "./urls-to-process.txt"
+global_url_list = sys.argv[1]
 global_security_url_downloads = "/mnt/c/GitHub/security-url-downloads/data"
 
 with open(global_url_list) as file:
