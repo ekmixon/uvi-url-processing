@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 
+import sys
+
 uvi_script_version = "0.0.2"
 uvi_script_name = sys.argv[0]
 
@@ -13,6 +15,7 @@ import datetime
 import re
 import calendar
 import scrapy
+from bs4 import BeautifulSoup
 
 # Kurt knows about Beautifulsoup and scrappy but Kurt also likes regex and state machines and DSA's are shockingly well formatted/regular.
 
@@ -21,6 +24,10 @@ import scrapy
 #
 global_url_list = sys.argv[1]
 global_security_url_downloads = "/mnt/c/GitHub/security-url-downloads/data"
+
+
+
+
 
 with open(global_url_list) as file:
     for line in file:
@@ -49,6 +56,30 @@ with open(global_url_list) as file:
 # ['<p>For the stable distribution (lenny), these problems have been fixed in version\n72+dfsg-5~lenny3.</p>',
 # '<p>For the unstable distribution (sid) these problems have been fixed in version\n85+dfsg-4.1</p>']
 # TODO: remove line return(s) and extract the distriburtion name, and the fixed in version X
+
+        with open(url_raw_data) as data_file1:
+            soup = BeautifulSoup(data_file1, "html.parser")
+            #print(soup.title)
+            paragraphs = soup.findAll('p')
+
+            for entry in paragraphs:
+                string_data = str(entry)
+                string_data = string_data.replace('\n', ' ')
+                if re.match("^<p>For the .+ (.+)", string_data):
+                    string_data = re.sub("^<p>", "", string_data)
+                    string_data = re.sub("</p>$", "", string_data)
+
+                    distro = re.findall("\(.*\)", string_data)
+                    distro_name = re.sub("^\(", "", distro[0])
+                    distro_name = re.sub("\)$", "", distro_name)
+                    print(distro_name)
+
+                    fixed_version = re.sub(".* these problems have been fixed in version ", "", string_data)
+
+                    print(fixed_version)
+
+                    print(string_data)
+
 
         with open(url_raw_data) as data_file:
             #
@@ -146,8 +177,8 @@ with open(global_url_list) as file:
                         "advisory_type": debian_dsa_id,
                         "vulnerability_status": info_vuln,
                         "processed_timestamp": processed_timestamp,
-                        "uvi_script_version": script_version,
-                        "uvi_script_name": script_name,
+                        "uvi_script_version": uvi_script_version,
+                        "uvi_script_name": uvi_script_name,
                         "other_identifiers": {
                             "cve": data_cve
                             }
