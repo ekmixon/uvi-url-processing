@@ -25,10 +25,10 @@ class uvi_user_config():
             error_msg = """
             Please create a JSON ~/.uvi/config.json config file, for example on Ubuntu/Windows host:
             {
-                "security-url-processing_repo_dir": "/mnt/c/GitHub/security-url-processing",
-                "security-url-list_repo_dir": "/mnt/c/GitHub/security-url-list",
-                "security-url-downloads_repo_dir": "/mnt/c/GitHub/security-url-downloads",
-                "security-database_repo_dir": "/mnt/c/GitHub/security-database",
+                "uvi-url-processing_repo_dir": "/mnt/c/GitHub/uvi-url-processing",
+                "uvi-url-list_repo_dir": "/mnt/c/GitHub/uvi-url-list",
+                "uvi-url-downloads_repo_dir": "/mnt/c/GitHub/uvi-url-downloads",
+                "uvi-database_repo_dir": "/mnt/c/GitHub/uvi-database",
                 "uvi-tools_repo_dir": "/mnt/c/GitHub/uvi-tools",
                 "github_username": "",
                 "github_api_token": ""

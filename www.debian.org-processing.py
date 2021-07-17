@@ -23,7 +23,7 @@ from bs4 import BeautifulSoup
 # Processa file with a list of URLs
 #
 global_url_list = sys.argv[1]
-global_security_url_downloads = "/mnt/c/GitHub/security-url-downloads/data"
+global_uvi_url_downloads = "/mnt/c/GitHub/uvi-url-downloads/data"
 
 
 
@@ -43,7 +43,7 @@ with open(global_url_list) as file:
         url_hash_3 = url_hash[4:6]
         url_hash_4 = url_hash[6:8]
 
-        url_directory = global_security_url_downloads + "/" + url_hash_1 + "/" + url_hash_2 + "/" + url_hash_3 + "/" + url_hash_4 + "/" + url_hash
+        url_directory = global_uvi_url_downloads + "/" + url_hash_1 + "/" + url_hash_2 + "/" + url_hash_3 + "/" + url_hash_4 + "/" + url_hash
         url_directory_raw_data = url_directory + "/raw-data"
         url_raw_data = url_directory_raw_data + "/server_response.data"
         url_extracted_data_file = url_directory + "/extracted_data.json"

@@ -7,7 +7,7 @@ import re
 #
 # Process www.debian.org file
 #
-global_url_list="/mnt/c/GitHub/security-url-list/data/www.debian.org"
+global_url_list="/mnt/c/GitHub/uvi-url-list/data/www.debian.org"
 
 #
 # Does this site now use HTTPS by default (some still don't)
@@ -18,7 +18,7 @@ global_site_uses_https=True
 # Read the file, lines = urls = entries in a dict
 # then walk the dict and normalize stuff and write to the same dict?
 # if changed/removed delete that key?
-# then check if we already have the data in https://github.com/cloudsecurityalliance/security-url-downloads
+# then check if we already have the data in https://github.com/cloudsecurityalliance/uvi-url-downloads
 # and the check time and so on
 #
 
