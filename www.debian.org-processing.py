@@ -2,7 +2,7 @@
 
 import sys
 
-uvi_script_version = "0.0.3"
+uvi_script_version = "0.0.5"
 uvi_script_name = sys.argv[0]
 
 import hashlib
@@ -67,14 +67,21 @@ with open(global_url_list) as file:
                 string_data = string_data.replace('\n', ' ')
                 # (old stable|oldstable|stable|testing|unstable|upcoming)
                 if re.match("^<p>For the (old stable|oldstable|stable|testing|unstable|upcoming) (.+)", string_data):
+                    print(string_data)
                     package_info_listing={}
                     string_data = re.sub("^<p>", "", string_data)
                     string_data = re.sub("</p>$", "", string_data)
 
-                    distro = re.findall("\(.*\)", string_data)
-                    # Handle multiple???
-                    distro_name = re.sub("^\(", "", distro[0])
-                    distro_name = re.sub("\)$", "", distro_name)
+                    # Some advisories have no distro name listed https://www.debian.org/security/2002/dsa-115
+
+                    if re.match(".*\(.*\).*", string_data):
+                        distro = re.findall("\(.*\)", string_data)
+                        # Handle multiple???
+                        distro_name = re.sub("^\(", "", distro[0])
+                        distro_name = re.sub("\)$", "", distro_name)
+                    else:
+                        # add better parsing here but we'd need to map "testing" to the date to get the version? Just use "Debian testing as of Y-M-D"?
+                        distro_name = "UNKNOWN"
 
                     fixed_version = re.sub(".* (this|these) (problem|problems) (have|has) been fixed in version ", "", string_data)
                     fixed_version = re.sub("\.$", "", fixed_version)
