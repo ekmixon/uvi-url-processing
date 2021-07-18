@@ -2,7 +2,7 @@
 
 import sys
 
-uvi_script_version = "0.0.5"
+uvi_script_version = "0.0.6"
 uvi_script_name = sys.argv[0]
 
 import hashlib
@@ -141,14 +141,18 @@ with open(global_url_list) as file:
                 if date_reported_flag == True:
                     info_date = re.sub("^\s*<dd>", "", data_line)
                     info_date = re.sub("</dd>$", "", info_date)
-                    info_date_parts = info_date.split(" ")
-                    # TODO: pad out the month/day to two digits
-                    info_date_year = str(info_date_parts[2])
-                    info_date_month = str(list(calendar.month_abbr).index(info_date_parts[1])).rjust(2, "0")
-                    info_date_date = str(info_date_parts[0]).rjust(2, "0")
-                    info_date_string = info_date_year + "-" + info_date_month + "-" + info_date_date
-                    # print(info_date_string)
-                    date_reported_flag = False
+                    if info_date == "undated":
+                        print("undated")
+                        info_date_string = "UNKNOWN"
+                        date_reported_flag = False
+                    else:
+                        info_date_parts = info_date.split(" ")
+                        info_date_year = str(info_date_parts[2])
+                        info_date_month = str(list(calendar.month_abbr).index(info_date_parts[1])).rjust(2, "0")
+                        info_date_date = str(info_date_parts[0]).rjust(2, "0")
+                        info_date_string = info_date_year + "-" + info_date_month + "-" + info_date_date
+                        # print(info_date_string)
+                        date_reported_flag = False
                 if re.match("^<dt>Date Reported:</dt>$", data_line):
                     date_reported_flag = True
             # Collapse the CVE list
