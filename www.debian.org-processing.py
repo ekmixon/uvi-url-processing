@@ -196,4 +196,4 @@ with open(global_url_list) as file:
             f = open(url_extracted_data_file, "w")
             f.write(json.dumps(extracted_data, indent=4, sort_keys=True))
             f.close()
-            printe(json.dumps(extracted_data, indent=4, sort_keys=True))
+            print(json.dumps(extracted_data, indent=4, sort_keys=True))
