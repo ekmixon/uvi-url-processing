@@ -2,7 +2,7 @@
 
 import sys
 
-uvi_script_version = "0.0.2"
+uvi_script_version = "0.0.3"
 uvi_script_name = sys.argv[0]
 
 import hashlib
@@ -26,11 +26,10 @@ global_url_list = sys.argv[1]
 global_uvi_url_downloads = "/mnt/c/GitHub/uvi-url-downloads/data"
 
 
-
-
-
 with open(global_url_list) as file:
     for line in file:
+        # TODO: add check for blank line and ignore?
+        # "" cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f2b0ff8318d2877eec2f63b931bd47417a81a538327af927da3e
         timestamp = datetime.datetime.utcnow() # <-- get time in UTC
         processed_timestamp = timestamp.isoformat("T") + "Z"
         url = line.rstrip()
@@ -61,25 +60,30 @@ with open(global_url_list) as file:
             soup = BeautifulSoup(data_file1, "html.parser")
             #print(soup.title)
             paragraphs = soup.findAll('p')
+            package_info=[]
 
             for entry in paragraphs:
                 string_data = str(entry)
                 string_data = string_data.replace('\n', ' ')
-                if re.match("^<p>For the .+ (.+)", string_data):
+                # (old stable|oldstable|stable|testing|unstable|upcoming)
+                if re.match("^<p>For the (old stable|oldstable|stable|testing|unstable|upcoming) (.+)", string_data):
+                    package_info_listing={}
                     string_data = re.sub("^<p>", "", string_data)
                     string_data = re.sub("</p>$", "", string_data)
 
                     distro = re.findall("\(.*\)", string_data)
+                    # Handle multiple???
                     distro_name = re.sub("^\(", "", distro[0])
                     distro_name = re.sub("\)$", "", distro_name)
-                    print(distro_name)
 
-                    fixed_version = re.sub(".* these problems have been fixed in version ", "", string_data)
+                    fixed_version = re.sub(".* (this|these) (problem|problems) (have|has) been fixed in version ", "", string_data)
+                    fixed_version = re.sub("\.$", "", fixed_version)
 
-                    print(fixed_version)
-
-                    print(string_data)
-
+                    package_info_listing={
+                        "distribution_affected": distro_name,
+                        "fixed in": fixed_version
+                    }
+                    package_info.append(package_info_listing)
 
         with open(url_raw_data) as data_file:
             #
@@ -172,8 +176,10 @@ with open(global_url_list) as file:
                     },
                 "uvi": {
                     "vendor_name": "Debian",
-                    "product_name": debian_package_name,
+                    "product_name": "Linux",
                     "experimental": {
+                        "package_name": debian_package_name,
+                        "package_affected": package_info,
                         "advisory_type": debian_dsa_id,
                         "vulnerability_status": info_vuln,
                         "processed_timestamp": processed_timestamp,
@@ -185,7 +191,9 @@ with open(global_url_list) as file:
                         }
                     }
                 }
+            #print(json.dumps(extracted_data, indent=4, sort_keys=True))
 
             f = open(url_extracted_data_file, "w")
             f.write(json.dumps(extracted_data, indent=4, sort_keys=True))
             f.close()
+            printe(json.dumps(extracted_data, indent=4, sort_keys=True))

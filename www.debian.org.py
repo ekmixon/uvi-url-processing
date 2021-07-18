@@ -5,7 +5,8 @@ import re
 # TODO: take a command line argument of a file with new Debian URLs, check for "debian.org" and process?
 
 #
-# Process www.debian.org file
+# Process www.debian.org file and pass back all the whitelisted URLs we know how to handle
+# TODO: whitelist (URL's we know how to handle), blacklist (URL's to be avoided), ignorelist (URL's we don't care about), and the greylist (unknonwn, need attention)
 #
 global_url_list="/mnt/c/GitHub/uvi-url-list/data/www.debian.org"
 
