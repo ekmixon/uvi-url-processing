@@ -42,7 +42,6 @@ with open(global_url_list) as file:
         else:
             Path(url_directory_raw_data).mkdir(parents=True, exist_ok=True)
 
-
         # if already_seen == True:
         #
         # Logic to check timestamp and get again if over X timestamp
