@@ -7,36 +7,38 @@
 # For Debian/RedHat/etc CVE just assigns a vendor_name of "n/a" and uses the package name/version which is not globally unique and will break so we set vendor_name as "Debian Linux foo"
 
 # CVE4
-CVE4 = {
+
+
+CVE4 = [{
   "data_type": "CVE",
   "data_format": "MITRE",
   "data_version": "4.0",
   "CVE_data_meta": {
     "ID": uvi_data_cve_id,
   },
-  "affects": {
-    "vendor": {
-      "vendor_data": [
-        {
-          "vendor_name": uvi_data_vendor_name + " " + uvi_data_product_name + " " + uvi_data_product_version,
-          "product": {
-            "product_data": [
-              {
-                "product_name": uvi_data_package_name,
-                "version": {
-                  "version_data": [
+  "affects":  {
+                "vendor": {
+                  "vendor_data": [
                     {
-                      "version_value": "<" + uvi_data_package_name_fixed
+                      "vendor_name": uvi_data_vendor_name + " " + uvi_data_product_name + " " + uvi_data_product_version,
+                      "product": {
+                        "product_data": [
+                          {
+                            "product_name": uvi_data_package_name,
+                            "version": {
+                              "version_data": [
+                                {
+                                  "version_value": "<" + uvi_data_package_name_fixed
+                                }
+                              ]
+                            }
+                          }
+                        ]
+                      }
                     }
                   ]
                 }
-              }
-            ]
-          }
-        }
-      ]
-    }
-  },
+              },
   "problemtype": {
     "problemtype_data": [
       {
@@ -64,12 +66,12 @@ CVE4 = {
       }
     ]
   }
-}
+}]
 
 # OSV
 # https://osv.dev/docs/#tag/vulnerability_schema
 #
-OSV = {
+OSV = [{
   "id": "string",
   "published": uvi_advisory_timestamp",
   "aliases": [
@@ -94,4 +96,4 @@ OSV = {
       "url": uvi_data_reference_url
     }
   ]
-}
+}]
