@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import json
 import re
 
 # TODO: take a command line argument of a file with new Debian URLs, check for "debian.org" and process?
@@ -8,7 +9,14 @@ import re
 # Process www.debian.org file and pass back all the whitelisted URLs we know how to handle
 # TODO: whitelist (URL's we know how to handle), blacklist (URL's to be avoided), ignorelist (URL's we don't care about), and the greylist (unknonwn, need attention)
 #
-global_url_list="/mnt/c/GitHub/uvi-url-list/data/www.debian.org"
+from pathlib import Path
+home = str(Path.home())
+config_file = home + '/.uvi/config.json'
+
+with open(config_file) as config_data:
+  uvi_config = json.load(config_data)
+
+global_url_list = uvi_config["global"]["uvi_url_list_repo"] + "/data/www.debian.org"
 
 #
 # Does this site now use HTTPS by default (some still don't)
@@ -47,7 +55,7 @@ with open(global_url_list) as file:
         # https://www.debian.org/security/2014/dsa-2906
         if re.match("^https://www.debian.org/security/[1-2][0-9][0-9][0-9]/dsa-[0-9]*$", processed_url):
             global_url_data[processed_url] = ""
-        
+
         # DSA undated - remove translations
         # 1* removes /, /index, /index.html
         if re.match("^https://www.debian.org/security/undated/1.*", processed_url):

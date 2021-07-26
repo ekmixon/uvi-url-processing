@@ -25,8 +25,15 @@ from bs4 import BeautifulSoup
 # Processa file with a list of URLs
 #
 global_url_list = sys.argv[1]
-global_uvi_url_downloads = "/mnt/c/GitHub/uvi-url-downloads/data"
 
+from pathlib import Path
+home = str(Path.home())
+config_file = home + '/.uvi/config.json'
+
+with open(config_file) as config_data:
+  uvi_config = json.load(config_data)
+
+global_uvi_url_downloads = uvi_config["global"]["uvi_url_downloads_repo"]
 
 with open(global_url_list) as file:
     for line in file:
@@ -44,7 +51,7 @@ with open(global_url_list) as file:
         url_hash_3 = url_hash[4:6]
         url_hash_4 = url_hash[6:8]
 
-        url_directory = global_uvi_url_downloads + "/" + url_hash_1 + "/" + url_hash_2 + "/" + url_hash_3 + "/" + url_hash_4 + "/" + url_hash
+        url_directory = global_uvi_url_downloads + "/data/" + url_hash_1 + "/" + url_hash_2 + "/" + url_hash_3 + "/" + url_hash_4 + "/" + url_hash
         url_directory_raw_data = url_directory + "/raw-data"
         url_raw_data = url_directory_raw_data + "/server_response.data"
         url_extracted_data_file = url_directory + "/extracted_data.json"
@@ -212,7 +219,6 @@ with open(global_url_list) as file:
             # One CVE entry per CVE with multiple products
             # One OSV per major product with multiple aliases?
             #
-            #
             CVE4_data = []
             # CVE4
             for cve_item in data_cve:
@@ -222,12 +228,12 @@ with open(global_url_list) as file:
                             "data_type": "CVE",
                             "data_format": "MITRE",
                             "data_version": "4.0",
-                            "CVE_data_meta": {
-                                "ID": uvi_data_cve_id
-                            }
+                                "CVE_data_meta": {
+                                    "ID": cve_item
+                                }
                             }
                 # for each product/version do
-                CVE_entry =    {
+                CVE_entry = {
                             "affects":  {
                                 "vendor": {
                                     "vendor_data": [
@@ -247,9 +253,9 @@ with open(global_url_list) as file:
                             ]
                         }
                     }
-                    }
+                }
                     # one
-                    CVE_entry =    {
+                CVE_entry =    {
                     "problemtype": {
                         "problemtype_data": [
                             { "description": [
@@ -259,16 +265,18 @@ with open(global_url_list) as file:
                                 ]
                             }
                         ]
-                    }}
+                    }
+                }
                     # for each URL, should be one
-                    CVE_entry =    {
+                CVE_entry =    {
                     "references": {
                         "reference_data": [
                             { "url": uvi_data_reference_url }
                         ]
-                    }}
+                    }
+                }
 
-                    CVE_entry =    {
+                CVE_entry =    {
                     "description": {
                         "description_data": [
                             { "lang": "eng",
@@ -285,4 +293,4 @@ with open(global_url_list) as file:
             f = open(url_extracted_data_file, "w")
             f.write(json.dumps(extracted_data, indent=4, sort_keys=True))
             f.close()
-            print(json.dumps(extracted_data, indent=4, sort_keys=True))
+            print(json.dumps(data_cve, indent=4, sort_keys=True))
