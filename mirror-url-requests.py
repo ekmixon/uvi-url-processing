@@ -10,19 +10,30 @@ import json
 import datetime
 import sys
 
-uvi_script_version = "0.0.2"
+uvi_script_version = "0.0.3"
 uvi_script_name = sys.argv[0]
 
 #
 # Processa file with a list of URLs
 #
 global_url_list = sys.argv[1]
-global_uvi_url_downloads = "/mnt/c/GitHub/uvi-url-downloads/data"
+
+
+#
+# Get the ~/.uvi/config.json and read it into uvi_config
+#
+from pathlib import Path
+home = str(Path.home())
+config_file = home + '/.uvi/config.json'
+with open(config_file) as config_data:
+  uvi_config = json.load(config_data)
+global_uvi_url_downloads = uvi_config["global"]["uvi_url_downloads_repo"] + "/data/"
+
+#global_uvi_url_downloads = "/mnt/c/GitHub/uvi-url-downloads/data"
 
 with open(global_url_list) as file:
     for line in file:
         already_seen = False
-        print("processing: " + line)
         url = line.rstrip()
         url_bytes = url.encode()
         h = hashlib.sha512()
@@ -37,7 +48,6 @@ with open(global_url_list) as file:
         url_directory_raw_data=url_directory + "/raw-data"
 
         if Path(url_directory_raw_data).is_dir():
-            print("file directory already exists: " + url_directory_raw_data)
             already_seen = True
         else:
             Path(url_directory_raw_data).mkdir(parents=True, exist_ok=True)
@@ -58,6 +68,9 @@ with open(global_url_list) as file:
             f.write(response.content)
             f.close()
 
+            #
+            # Request file data
+            #
             request_data_file = url_directory + "/request.json"
             request_data = {
                 "URL_requested": url,
@@ -69,6 +82,16 @@ with open(global_url_list) as file:
             f.write(json.dumps(request_data, indent=4, sort_keys=True))
             f.close()
 
+            #
+            # Remove old txt file if exists
+            #
+            request_data_file_txt = url_directory + "/request.txt"
+            if os.path.exists(request_data_file_txt):
+                os.remove(request_data_file_txt)
+
+            #
+            # Response file data
+            #
             response_data_file = url_directory + "/response.json"
             f = open(response_data_file, "w")
             response_data = {
@@ -80,3 +103,10 @@ with open(global_url_list) as file:
             }
             f.write(json.dumps(response_data, indent=4, sort_keys=True))
             f.close()
+
+            #
+            # Remove old txt file if exists
+            #
+            response_data_file_txt = url_directory + "/response.txt"
+            if os.path.exists(response_data_file_txt):
+                os.remove(response_data_file_txt)

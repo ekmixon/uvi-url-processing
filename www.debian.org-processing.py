@@ -26,15 +26,19 @@ from bs4 import BeautifulSoup
 #
 global_url_list = sys.argv[1]
 
+#
+# Get the ~/.uvi/config.json and read it into uvi_config
+#
 from pathlib import Path
 home = str(Path.home())
 config_file = home + '/.uvi/config.json'
-
 with open(config_file) as config_data:
   uvi_config = json.load(config_data)
-
 global_uvi_url_downloads = uvi_config["global"]["uvi_url_downloads_repo"]
 
+#
+#
+#
 with open(global_url_list) as file:
     for line in file:
         # TODO: add check for blank line and ignore?
@@ -214,6 +218,11 @@ with open(global_url_list) as file:
                 }
             #print(json.dumps(extracted_data, indent=4, sort_keys=True))
 
+            uvi_data_vendor_name = "Debian"
+            uvi_data_product_name = "Linux"
+            uvi_data_package_name = package_info
+            uvi_data_reference_url = url
+            uvi_data_vuln_description = "" # TODO MORE INFORMATION:
             #
             # NEW FORMAT:
             # One CVE entry per CVE with multiple products
@@ -222,68 +231,92 @@ with open(global_url_list) as file:
             CVE4_data = []
             # CVE4
             for cve_item in data_cve:
-                print(cve_item)
                 CVE_entry = {}
-                CVE_entry = {
-                            "data_type": "CVE",
-                            "data_format": "MITRE",
-                            "data_version": "4.0",
-                                "CVE_data_meta": {
-                                    "ID": cve_item
-                                }
-                            }
-                # for each product/version do
-                CVE_entry = {
-                            "affects":  {
-                                "vendor": {
-                                    "vendor_data": [
-                                        { "vendor_name": uvi_data_vendor_name + " " + uvi_data_product_name + " " + uvi_data_product_version,
-                                    "product": {
-                                        "product_data": [
-                                            { "product_name": uvi_data_package_name,
-                                                "version": {
-                                                "version_data": [
-                                                    { "version_value": "<" + uvi_data_package_name_fixed }
-                                                                ]
-                                                }
-                                            }
-                                        ]
-                                    }
-                                }
-                            ]
-                        }
-                    }
-                }
-                    # one
-                CVE_entry =    {
-                    "problemtype": {
-                        "problemtype_data": [
-                            { "description": [
-                                { "lang": "eng",
-                                "value": uvi_data_vuln_type
-                                }
-                                ]
-                            }
-                        ]
-                    }
-                }
-                    # for each URL, should be one
-                CVE_entry =    {
-                    "references": {
-                        "reference_data": [
-                            { "url": uvi_data_reference_url }
-                        ]
-                    }
-                }
+                CVE_entry["data_type"] = "CVE"
+                CVE_entry["data_format"] = "MITRE"
+                CVE_entry["data_version"] = "4.0"
+                CVE_entry["CVE_data_meta"] = {}
+                CVE_entry["CVE_data_meta"]["ID"] = cve_item
 
-                CVE_entry =    {
-                    "description": {
-                        "description_data": [
-                            { "lang": "eng",
-                            "value": uvi_data_vuln_description }
-                        ]
-                    }
-                }
+                # for each product/version do
+                CVE_entry["affects"] = {}
+                CVE_entry["affects"]["vendor"] = {}
+                CVE_entry["affects"]["vendor"]["vendor_data"] = []
+                for entry in package_info:
+                    #print(entry)
+                    #exit()
+                    CVE_entry_vendor_data={}
+                    CVE_entry_vendor_data["vendor_name"] = uvi_data_vendor_name + " Linux"
+                    CVE_entry_vendor_data["affects"] = {}
+                    CVE_entry_vendor_data["affects"]["vendor"] = {}
+                    CVE_entry_vendor_data["affects"]["vendor"]["vendor_data"] = {}
+                    CVE_entry_vendor_data["affects"]["vendor"]["vendor_data"]["product"] = {}
+                    CVE_entry_vendor_data["affects"]["vendor"]["vendor_data"]["product"]["product_data"] = []
+                    CVE_entry_vendor_data["affects"]["vendor"]["vendor_data"]["product"]["product_data"].append({})
+                    CVE_entry_vendor_data["affects"]["vendor"]["vendor_data"]["product"]["product_data"][0]["product_name"] = entry["distribution_affected"]
+                    CVE_entry_vendor_data["affects"]["vendor"]["vendor_data"]["product"]["product_data"][0]["version"] = {}
+                    CVE_entry_vendor_data["affects"]["vendor"]["vendor_data"]["product"]["product_data"][0]["version"]["version_data"] = []
+                    CVE_entry_vendor_data["affects"]["vendor"]["vendor_data"]["product"]["product_data"][0]["version"]["version_data"].append({})
+                    # ಠ_ಠ
+                    CVE_entry_vendor_data["affects"]["vendor"]["vendor_data"]["product"]["product_data"][0]["version"]["version_data"][0]["version_value"] = "prior to " + entry["fixed in"]
+
+                    CVE_entry["affects"]["vendor"]["vendor_data"].append(CVE_entry_vendor_data)
+
+
+
+                CVE4_data.append(CVE_entry)
+
+                print(json.dumps(CVE4_data, indent=4, sort_keys=True))
+                exit()
+#                    print(entry)
+
+
+
+#                                        { "vendor_name": uvi_data_vendor_name + " " + uvi_data_product_name + " " + uvi_data_product_version,
+#                                    "product": {
+#                                        "product_data": [
+#                                            { "product_name": uvi_data_package_name,
+#                                                "version": {
+#                                                "version_data": [
+#                                                    { "version_value": "<" + uvi_data_package_name_fixed }
+#                                                                ]
+#                                                }
+#                                            }
+#                                        ]
+#                                    }
+#                                }
+#                            ]
+#                        }
+#                    }
+#                }
+                    # one
+#                CVE_entry =    {
+#                    "problemtype": {
+#                        "problemtype_data": [
+#                            { "description": [
+#                                { "lang": "eng",
+#                                "value": uvi_data_vuln_type
+#                                }
+#                                ]
+#                            }
+#                        ]
+#                    }
+#                }
+                    # for each URL, should be one
+#                CVE_entry =    {
+#                    "references": {
+#                        "reference_data": [
+#                            { "url": uvi_data_reference_url }
+#                        ]
+#                    }
+##
+#                CVE_entry =    {
+#                    "description": {
+#                        "description_data": [
+#                            { "lang": "eng",
+##                        ]
+#                    }
+#                }
                 CVE4_data.append(CVE_entry)
 
 
@@ -293,4 +326,4 @@ with open(global_url_list) as file:
             f = open(url_extracted_data_file, "w")
             f.write(json.dumps(extracted_data, indent=4, sort_keys=True))
             f.close()
-            print(json.dumps(data_cve, indent=4, sort_keys=True))
+            print(json.dumps(CVE4_data, indent=4, sort_keys=True))
