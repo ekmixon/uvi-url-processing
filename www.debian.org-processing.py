@@ -268,62 +268,9 @@ with open(global_url_list) as file:
 
                 print(json.dumps(CVE4_data, indent=4, sort_keys=True))
                 exit()
-#                    print(entry)
 
-
-
-#                                        { "vendor_name": uvi_data_vendor_name + " " + uvi_data_product_name + " " + uvi_data_product_version,
-#                                    "product": {
-#                                        "product_data": [
-#                                            { "product_name": uvi_data_package_name,
-#                                                "version": {
-#                                                "version_data": [
-#                                                    { "version_value": "<" + uvi_data_package_name_fixed }
-#                                                                ]
-#                                                }
-#                                            }
-#                                        ]
-#                                    }
-#                                }
-#                            ]
-#                        }
-#                    }
-#                }
-                    # one
-#                CVE_entry =    {
-#                    "problemtype": {
-#                        "problemtype_data": [
-#                            { "description": [
-#                                { "lang": "eng",
-#                                "value": uvi_data_vuln_type
-#                                }
-#                                ]
-#                            }
-#                        ]
-#                    }
-#                }
-                    # for each URL, should be one
-#                CVE_entry =    {
-#                    "references": {
-#                        "reference_data": [
-#                            { "url": uvi_data_reference_url }
-#                        ]
-#                    }
-##
-#                CVE_entry =    {
-#                    "description": {
-#                        "description_data": [
-#                            { "lang": "eng",
-##                        ]
-#                    }
-#                }
                 CVE4_data.append(CVE_entry)
 
-
-
-
-
             f = open(url_extracted_data_file, "w")
-            f.write(json.dumps(extracted_data, indent=4, sort_keys=True))
+            f.write(json.dumps(CVE4_data, indent=4, sort_keys=True))
             f.close()
-            print(json.dumps(CVE4_data, indent=4, sort_keys=True))

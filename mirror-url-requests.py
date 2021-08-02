@@ -9,6 +9,7 @@ from requests.exceptions import RequestException
 import json
 import datetime
 import sys
+import os
 
 uvi_script_version = "0.0.3"
 uvi_script_name = sys.argv[0]
