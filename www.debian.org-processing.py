@@ -3,10 +3,19 @@
 #
 # Testing URLS
 # https://www.debian.org/security/2016/dsa-3710
+# https://www.debian.org/security/2016/dsa-3740
+# https://www.debian.org/security/2016/dsa-3657
+# https://www.debian.org/security/2020/dsa-4794
+# https://www.debian.org/security/2019/dsa-4573
+# https://www.debian.org/security/2019/dsa-4564
+# https://www.debian.org/security/2021/dsa-4936
+# https://www.debian.org/security/2021/dsa-4904
+# https://www.debian.org/security/2021/dsa-4902
+# https://www.debian.org/security/2021/dsa-4885
 #
 import sys
 
-uvi_script_version = "0.0.6"
+uvi_script_version = "0.1.0"
 uvi_script_name = sys.argv[0]
 
 import hashlib
@@ -18,6 +27,11 @@ import re
 import calendar
 import scrapy
 from bs4 import BeautifulSoup
+
+
+with open(uvi_script_name,"rb") as f:
+    bytes = f.read() # read entire file as bytes
+    uvi_script_hash = hashlib.sha512(bytes).hexdigest();
 
 # Kurt knows about Beautifulsoup and scrappy but Kurt also likes regex and state machines and DSA's are shockingly well formatted/regular.
 
@@ -37,7 +51,7 @@ with open(config_file) as config_data:
 global_uvi_url_downloads = uvi_config["global"]["uvi_url_downloads_repo"]
 
 #
-#
+# Take a URL, SHA512, find the path to the mirrored data
 #
 with open(global_url_list) as file:
     for line in file:
@@ -78,7 +92,9 @@ with open(global_url_list) as file:
             for entry in paragraphs:
                 string_data = str(entry)
                 string_data = string_data.replace('\n', ' ')
-                # (old stable|oldstable|stable|testing|unstable|upcoming)
+                # Distro version and package version
+                # For the (old stable|oldstable|stable|testing|unstable|upcoming) ....
+                #
                 if re.match("^<p>For the (old stable|oldstable|stable|testing|unstable|upcoming) (.+)", string_data):
                     #print(string_data)
                     package_info_listing={}
@@ -104,6 +120,11 @@ with open(global_url_list) as file:
                         "fixed in": fixed_version
                     }
                     package_info.append(package_info_listing)
+                #
+                # One or more issues?
+                # Multiple security issues (have been found in|were discovered in)
+                # (Multiple|Several) vulnerabilities (have been|were) discovered in
+                #
 
         with open(url_raw_data) as data_file:
             #
@@ -171,7 +192,6 @@ with open(global_url_list) as file:
             # Collapse the CVE list
             data_cve = list(set(data_cve))
 
-
             #
             # Final data
             #
@@ -183,94 +203,40 @@ with open(global_url_list) as file:
             # url - string
             # info_vuln - Yes or False
             # info_date_string - YYYY-M-D
-            # processed_timestamp - YYYY-MM-DD-HH-MM-SS
+            # uvi_processed_timestamp - YYYY-MM-DD-HH-MM-SS
             # uvi_script_version - string
             # uvi_script_name - string
 
-            # Try to use standards where possible e.g. OSV
             extracted_data={
-                "osv": {
-                    "published": info_date_string,
-                    "package": {
-                        "name": debian_package_name
-                        },
-                    "references": [ {
-                        "type": debian_advisory_type,
-                        "url": url
-                        } ]
-                    },
-                "uvi": {
-                    "vendor_name": "Debian",
-                    "product_name": "Linux",
-                    "experimental": {
-                        "package_name": debian_package_name,
-                        "package_affected": package_info,
-                        "advisory_type": debian_dsa_id,
-                        "vulnerability_status": info_vuln,
-                        "processed_timestamp": processed_timestamp,
-                        "uvi_script_version": uvi_script_version,
-                        "uvi_script_name": uvi_script_name,
-                        "other_identifiers": {
-                            "cve": data_cve
+                "uvi": [
+                    {
+                        "extracted_data" : [
+                            {
+                                "vendor_name": "Debian",
+                                "product_name": "Linux",
+                                "package_name": debian_package_name,
+                                "affected": package_info,
+                                "advisory_id": debian_dsa_id,
+                                "advisory_type": debian_advisory_type,
+                                "vulnerability_status": info_vuln,
+                                "cve_ids": data_cve,
+                                "info_date_string": info_date_string
                             }
+                        ],
+                        "meta_data": {
+                            "uvi_processed_timestamp": processed_timestamp,
+                            "uvi_script_hash": uvi_script_hash,
+                            "uvi_script_name": uvi_script_name,
+                            "uvi_script_version": uvi_script_version,
+                            "uvi_url_processed": url
                         }
                     }
-                }
+                ]
+            }
             #print(json.dumps(extracted_data, indent=4, sort_keys=True))
 
-            uvi_data_vendor_name = "Debian"
-            uvi_data_product_name = "Linux"
-            uvi_data_package_name = package_info
-            uvi_data_reference_url = url
             uvi_data_vuln_description = "" # TODO MORE INFORMATION:
-            #
-            # NEW FORMAT:
-            # One CVE entry per CVE with multiple products
-            # One OSV per major product with multiple aliases?
-            #
-            CVE4_data = []
-            # CVE4
-            for cve_item in data_cve:
-                CVE_entry = {}
-                CVE_entry["data_type"] = "CVE"
-                CVE_entry["data_format"] = "MITRE"
-                CVE_entry["data_version"] = "4.0"
-                CVE_entry["CVE_data_meta"] = {}
-                CVE_entry["CVE_data_meta"]["ID"] = cve_item
-
-                # for each product/version do
-                CVE_entry["affects"] = {}
-                CVE_entry["affects"]["vendor"] = {}
-                CVE_entry["affects"]["vendor"]["vendor_data"] = []
-                for entry in package_info:
-                    #print(entry)
-                    #exit()
-                    CVE_entry_vendor_data={}
-                    CVE_entry_vendor_data["vendor_name"] = uvi_data_vendor_name + " Linux"
-                    CVE_entry_vendor_data["affects"] = {}
-                    CVE_entry_vendor_data["affects"]["vendor"] = {}
-                    CVE_entry_vendor_data["affects"]["vendor"]["vendor_data"] = {}
-                    CVE_entry_vendor_data["affects"]["vendor"]["vendor_data"]["product"] = {}
-                    CVE_entry_vendor_data["affects"]["vendor"]["vendor_data"]["product"]["product_data"] = []
-                    CVE_entry_vendor_data["affects"]["vendor"]["vendor_data"]["product"]["product_data"].append({})
-                    CVE_entry_vendor_data["affects"]["vendor"]["vendor_data"]["product"]["product_data"][0]["product_name"] = entry["distribution_affected"]
-                    CVE_entry_vendor_data["affects"]["vendor"]["vendor_data"]["product"]["product_data"][0]["version"] = {}
-                    CVE_entry_vendor_data["affects"]["vendor"]["vendor_data"]["product"]["product_data"][0]["version"]["version_data"] = []
-                    CVE_entry_vendor_data["affects"]["vendor"]["vendor_data"]["product"]["product_data"][0]["version"]["version_data"].append({})
-                    # ಠ_ಠ
-                    CVE_entry_vendor_data["affects"]["vendor"]["vendor_data"]["product"]["product_data"][0]["version"]["version_data"][0]["version_value"] = "prior to " + entry["fixed in"]
-
-                    CVE_entry["affects"]["vendor"]["vendor_data"].append(CVE_entry_vendor_data)
-
-
-
-                CVE4_data.append(CVE_entry)
-
-                print(json.dumps(CVE4_data, indent=4, sort_keys=True))
-                exit()
-
-                CVE4_data.append(CVE_entry)
 
             f = open(url_extracted_data_file, "w")
-            f.write(json.dumps(CVE4_data, indent=4, sort_keys=True))
+            f.write(json.dumps(extracted_data, indent=4, sort_keys=True))
             f.close()
