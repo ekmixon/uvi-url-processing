@@ -210,7 +210,7 @@ with open(global_url_list) as file:
             extracted_data={
                 "uvi": [
                     {
-                        "extracted_data" : [
+                        "extracted_data" :
                             {
                                 "vendor_name": "Debian",
                                 "product_name": "Linux",
@@ -221,8 +221,7 @@ with open(global_url_list) as file:
                                 "vulnerability_status": info_vuln,
                                 "cve_ids": data_cve,
                                 "info_date_string": info_date_string
-                            }
-                        ],
+                            },
                         "meta_data": {
                             "uvi_processed_timestamp": processed_timestamp,
                             "uvi_script_hash": uvi_script_hash,
