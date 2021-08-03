@@ -138,6 +138,7 @@ with open(global_url_list) as file:
             oldstable_flag = False
             unstable_flag = False
             for data_line in data_file:
+                advisory_formatting_issues = "no"
                 data_line = data_line.rstrip()
                 # Get the DSA if exists and the Debian package name
                 if re.match("^  <title>Debian -- Security Information -- .*", data_line):
@@ -157,6 +158,13 @@ with open(global_url_list) as file:
                         debian_advisory_type="DSA"
                         debian_dsa_id = debian_info[0]
                         debian_package_name = debian_info[1]
+                    #
+                    # Handle the dozen cases with no DSA/url because they have a package name
+                    #
+                    if not re.match("^(DSA|https)", debian_dsa_id):
+                        debian_dsa_id = url
+                        advisory_formatting_issues = "yes"
+
 
                 # Get any CVE ID's in the file
                 tmp_data_cve = re.findall(r'CVE-[0-9]+-[0-9]+', data_line)
@@ -232,6 +240,8 @@ with open(global_url_list) as file:
                     }
                 ]
             }
+            if advisory_formatting_issues == "yes":
+                extracted_data["uvi"][0]["extracted_data"]["advisory_formatting_issues"] = "yes"
             #print(json.dumps(extracted_data, indent=4, sort_keys=True))
 
             uvi_data_vuln_description = "" # TODO MORE INFORMATION:
