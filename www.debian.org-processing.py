@@ -176,7 +176,7 @@ with open(global_url_list) as file:
                     info_date = re.sub("^\s*<dd>", "", data_line)
                     info_date = re.sub("</dd>$", "", info_date)
                     if info_date == "undated":
-                        print("undated")
+                        #print("undated")
                         info_date_string = "UNKNOWN"
                         date_reported_flag = False
                     else:
