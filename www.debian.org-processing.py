@@ -15,7 +15,7 @@
 #
 import sys
 
-uvi_script_version = "0.1.1"
+uvi_script_version = "0.1.2"
 uvi_script_name = sys.argv[0]
 
 import hashlib
@@ -151,7 +151,7 @@ with open(global_url_list) as file:
                     if len(debian_info) == 1:
                         debian_advisory_type="preDSA"
                         debian_package_name = debian_info[0]
-                        debian_dsa_id = False
+                        debian_dsa_id = url
 
                     if len(debian_info) == 2:
                         debian_advisory_type="DSA"
