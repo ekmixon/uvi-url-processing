@@ -15,7 +15,7 @@
 #
 import sys
 
-uvi_script_version = "0.1.0"
+uvi_script_version = "0.1.1"
 uvi_script_name = sys.argv[0]
 
 import hashlib
