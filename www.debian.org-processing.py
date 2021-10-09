@@ -27,7 +27,7 @@ import re
 import calendar
 import scrapy
 from bs4 import BeautifulSoup
-
+from urllib.parse import urljoin
 
 with open(uvi_script_name,"rb") as f:
     bytes = f.read() # read entire file as bytes
@@ -86,6 +86,15 @@ with open(global_url_list) as file:
         with open(url_raw_data) as data_file1:
             soup = BeautifulSoup(data_file1, "html.parser")
             #print(soup.title)
+            for link in soup.findAll('a', attrs={'href': re.compile("^http")}):
+                full_link = urljoin(url, link.get('href'))
+                full_link = full_link.rstrip()
+                if re.search('\.(deb|dsc|gz)$', full_link):
+                    full_link = False
+                if full_link:
+                    print(full_link)
+
+
             paragraphs = soup.findAll('p')
             package_info=[]
 
@@ -138,7 +147,7 @@ with open(global_url_list) as file:
             oldstable_flag = False
             unstable_flag = False
             for data_line in data_file:
-                advisory_formatting_issues = "no"
+                uvi_advisory_formatting_issues = "no"
                 data_line = data_line.rstrip()
                 # Get the DSA if exists and the Debian package name
                 if re.match("^  <title>Debian -- Security Information -- .*", data_line):
@@ -163,8 +172,7 @@ with open(global_url_list) as file:
                     #
                     if not re.match("^(DSA|https)", debian_dsa_id):
                         debian_dsa_id = url
-                        advisory_formatting_issues = "yes"
-
+                        uvi_advisory_formatting_issues = "yes"
 
                 # Get any CVE ID's in the file
                 tmp_data_cve = re.findall(r'CVE-[0-9]+-[0-9]+', data_line)
@@ -227,10 +235,20 @@ with open(global_url_list) as file:
                                 "advisory_id": debian_dsa_id,
                                 "advisory_type": debian_advisory_type,
                                 "vulnerability_status": info_vuln,
-                                "cve_ids": data_cve,
+                                "aliases" : [
+                                    {
+                                        "namespace": "cve.mitre.org",
+                                        "ids": data_cve
+                                    },
+                                    {
+                                        "namespace": "www.debian.org",
+                                        "ids": debian_dsa_id
+                                    },
+                                ],
                                 "info_date_string": info_date_string
                             },
                         "meta_data": {
+                            "uvi_advisory_formatting_issues" : uvi_advisory_formatting_issues,
                             "uvi_processed_timestamp": processed_timestamp,
                             "uvi_script_hash": uvi_script_hash,
                             "uvi_script_name": uvi_script_name,
@@ -240,12 +258,9 @@ with open(global_url_list) as file:
                     }
                 ]
             }
-            if advisory_formatting_issues == "yes":
-                extracted_data["uvi"][0]["extracted_data"]["advisory_formatting_issues"] = "yes"
-            #print(json.dumps(extracted_data, indent=4, sort_keys=True))
 
             uvi_data_vuln_description = "" # TODO MORE INFORMATION:
 
-            f = open(url_extracted_data_file, "w")
-            f.write(json.dumps(extracted_data, indent=4, sort_keys=True))
-            f.close()
+#            f = open(url_extracted_data_file, "w")
+#            f.write(json.dumps(extracted_data, indent=4, sort_keys=True))
+#            f.close()
