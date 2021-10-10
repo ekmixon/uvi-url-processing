@@ -56,14 +56,14 @@ with open(global_url_list) as file:
         if re.match("^https://www.debian.org/security/[1-2][0-9][0-9][0-9]/dsa-[0-9]*$", processed_url):
             global_url_data[processed_url] = ""
 
-        # DSA undated - remove translations
+        # DSA undated - matches all and removes translations
         # 1* removes /, /index, /index.html
         if re.match("^https://www.debian.org/security/undated/1.*", processed_url):
             processed_url = re.sub("\.[a-z][a-z]\.html$", "", processed_url)
             global_url_data[processed_url] = ""
         # DSA pre DSA - remove translations
-        # https://www.debian.org/security/2014/dsa-2906
-        # https://www.debian.org/security/2014/dsa-2906.da.html
+        # https://www.debian.org/security/1997/19970417
+        # https://www.debian.org/security/1997/19970325a
         if re.match("^https://www.debian.org/security/[1-2][0-9][0-9][0-9]/[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][a-z]*\.[a-z][a-z]\.html", processed_url):
             processed_url = re.sub("\.[a-z][a-z]\.html$", "", processed_url)
             global_url_data[processed_url] = ""
