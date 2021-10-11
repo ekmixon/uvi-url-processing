@@ -10,6 +10,6 @@ URL data processing scripts
 
 Mirroring scripts, meta data extraction, etc.
 
-## rules/
+## rules
 
-URL processing rules and scripts.
+URL processing rules and scripts are stored in the repo uvi-url-list:rules
