@@ -45,7 +45,7 @@ global_url_list = sys.argv[1]
 #
 from pathlib import Path
 home = str(Path.home())
-config_file = home + '/.uvi/config.json'
+config_file = f'{home}/.uvi/config.json'
 with open(config_file) as config_data:
   uvi_config = json.load(config_data)
 global_uvi_url_downloads = uvi_config["global"]["uvi_url_downloads_repo"]
@@ -64,18 +64,18 @@ with open(global_url_list) as file:
         h = hashlib.sha512()
         h.update(url_bytes)
         url_hash = h.hexdigest()
-        url_hash_1 = url_hash[0:2]
+        url_hash_1 = url_hash[:2]
         url_hash_2 = url_hash[2:4]
         url_hash_3 = url_hash[4:6]
         url_hash_4 = url_hash[6:8]
 
-        url_directory = global_uvi_url_downloads + "/data/" + url_hash_1 + "/" + url_hash_2 + "/" + url_hash_3 + "/" + url_hash_4 + "/" + url_hash
-        url_directory_raw_data = url_directory + "/raw-data"
-        url_raw_data = url_directory_raw_data + "/server_response.data"
-        url_extracted_data_file = url_directory + "/extracted_data.json"
+        url_directory = f"{global_uvi_url_downloads}/data/{url_hash_1}/{url_hash_2}/{url_hash_3}/{url_hash_4}/{url_hash}"
+
+        url_directory_raw_data = f"{url_directory}/raw-data"
+        url_raw_data = f"{url_directory_raw_data}/server_response.data"
+        url_extracted_data_file = f"{url_directory}/extracted_data.json"
 
         # Version data is split across lines, 2-3 linmes, and can be multiple packages/versions within a line so we need to use scrapy, also differing fixed/unfixed/etc.
-
 # TODO: scrapy to process document
 # scrapy shell https://www.debian.org/security/2009/dsa-1907
 # response.xpath("//*[contains(text(), 'these problems have been fixed in version')]").getall()
@@ -194,15 +194,13 @@ with open(global_url_list) as file:
                     if info_date == "undated":
                         #print("undated")
                         info_date_string = "UNKNOWN"
-                        date_reported_flag = False
                     else:
                         info_date_parts = info_date.split(" ")
                         info_date_year = str(info_date_parts[2])
                         info_date_month = str(list(calendar.month_abbr).index(info_date_parts[1])).rjust(2, "0")
                         info_date_date = str(info_date_parts[0]).rjust(2, "0")
-                        info_date_string = info_date_year + "-" + info_date_month + "-" + info_date_date
-                        # print(info_date_string)
-                        date_reported_flag = False
+                        info_date_string = f"{info_date_year}-{info_date_month}-{info_date_date}"
+                    date_reported_flag = False
                 if re.match("^<dt>Date Reported:</dt>$", data_line):
                     date_reported_flag = True
             # Collapse the CVE list

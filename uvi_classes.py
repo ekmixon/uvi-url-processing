@@ -39,5 +39,5 @@ class uvi_user_config():
             return(False)
     def create_config_file():
         foo = 1
-    def write_config_file(key_name, data_value):
+    def write_config_file(self, data_value):
         foo = 2

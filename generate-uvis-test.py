@@ -43,7 +43,7 @@ global_url_list = sys.argv[1]
 #
 from pathlib import Path
 home = str(Path.home())
-config_file = home + '/.uvi/config.json'
+config_file = f'{home}/.uvi/config.json'
 with open(config_file) as config_data:
   uvi_config = json.load(config_data)
 global_uvi_url_downloads = uvi_config["global"]["uvi_url_downloads_repo"]
@@ -56,25 +56,27 @@ UVI_YEAR = 2021
 
 def UVI_ID_file_location(local_UVI_ID):
     # returns the UVI ID file location and makes the interim directories if they do not exist
-    filename = "UVI-" + str(UVI_YEAR) + "-" + str(local_UVI_ID) + ".json"
+    filename = f"UVI-{str(UVI_YEAR)}-{str(local_UVI_ID)}.json"
     sub_directory = re.sub("[0-9][0-9][0-9]$", "xxx", str(local_UVI_ID))
-    file_directory_sub = global_uvi_database_test + "/" + str(UVI_YEAR) + "/" + str(sub_directory)
+    file_directory_sub = (
+        f"{global_uvi_database_test}/{str(UVI_YEAR)}/{str(sub_directory)}"
+    )
+
     if not os.path.exists(file_directory_sub):
         os.makedirs(file_directory_sub)
-    file_path = global_uvi_database_test + "/" + str(UVI_YEAR) + "/" + str(sub_directory) + "/" + filename
-    return file_path
+    return f"{global_uvi_database_test}/{str(UVI_YEAR)}/{str(sub_directory)}/{filename}"
 
 def write_UVI_ID_file(local_UVI_ID, local_UVI_ID_DATA):
     file_path_is = UVI_ID_file_location(local_UVI_ID)
-    f = open(file_path_is, "w")
-    f.write(json.dumps(local_UVI_ID_DATA, indent=4, sort_keys=True))
-    f.close()
+    with open(file_path_is, "w") as f:
+        f.write(json.dumps(local_UVI_ID_DATA, indent=4, sort_keys=True))
 
 #
 # Take a URL, SHA512, find the path to the extracted data
 #
 
 with open(global_url_list) as file:
+    number_of_aliases = 1
     for line in file:
 
         # TODO: add check for blank line and ignore?
@@ -86,15 +88,15 @@ with open(global_url_list) as file:
         h = hashlib.sha512()
         h.update(url_bytes)
         url_hash = h.hexdigest()
-        url_hash_1 = url_hash[0:2]
+        url_hash_1 = url_hash[:2]
         url_hash_2 = url_hash[2:4]
         url_hash_3 = url_hash[4:6]
         url_hash_4 = url_hash[6:8]
 
-        url_directory = global_uvi_url_downloads + "/data/" + url_hash_1 + "/" + url_hash_2 + "/" + url_hash_3 + "/" + url_hash_4 + "/" + url_hash
-        url_extracted_data_file = url_directory + "/extracted_data.json"
+        url_directory = f"{global_uvi_url_downloads}/data/{url_hash_1}/{url_hash_2}/{url_hash_3}/{url_hash_4}/{url_hash}"
 
-        number_of_aliases = 1
+        url_extracted_data_file = f"{url_directory}/extracted_data.json"
+
         CVE_FOUND = False
 
         processed_timestamp = timestamp.isoformat("T") + "Z"
@@ -127,8 +129,8 @@ with open(global_url_list) as file:
                         write_UVI_ID_file(UVI_ID, UVI_DATA)
                         UVI_ID = UVI_ID + 1
                     else:
+                        CVE_FOUND = True
                         for CVE_ID in aliases["ids"]:
-                            CVE_FOUND = True
                             UVI_DATA={
                                 "UVI_ID" : UVI_ID,
                                 "meta_data": {
